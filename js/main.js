@@ -8,21 +8,22 @@ let tot_food = 0;
 const background_color = "#D4B59D";
 
 const food_rate = 60;
-const food_refill = 1;
+const food_refill = 2;
 const food_locations = 3;
 const food_quantity = 20;
 const food_radius = 10;
 const food_color = "#D5EFD5";
 const food_stroke = "#D5EFD5";
 
-const ant_number = 50;
+const ant_number = 100;
 const ant_radius = 8;
 const ant_color = "#572D15";
 const ant_stroke = "#572D15";
 const ant_food_color = "#B64D3A";
 const ant_speed = 4;
 
-const do_pheromones = false;
+const do_pheromones = true;
+const do_pheromone_draw = false;
 
 let momentum = 0.6; // memory
 let randomness = 0.15;
@@ -30,18 +31,18 @@ let home_coeff = 0.25;
 let food_coeff = 0.25;
 
 if (do_pheromones) {
-  momentum = 0.7;
-  randomness = 0.2;
-  home_coeff = 0.2;
-  food_coeff = 0.1;
+  momentum = 0.15;
+  randomness = 0.05;
+  home_coeff = 0.55;
+  food_coeff = 0.55;
 }
 
 let food_source;
 let ants = [];
 
-const pheromones_range = 15;
+const pheromones_range = 9;
 const pheromones_resolution = 10;
-const pheromones_ttl = 24000;
+const pheromones_ttl = 36000;
 
 let home_pheromones = [];
 let food_pheromones = [];
@@ -95,7 +96,7 @@ function draw() {
   // Draw
   background(background_color);
 
-  if (do_pheromones) {
+  if (do_pheromones && do_pheromone_draw) {
     draw_pheromones();
   }
 
@@ -173,34 +174,38 @@ const home_pher_col = "rgba(159,216,223,";
 function draw_pheromones() {
   for (let i = 0; i < Math.ceil(w / pheromones_resolution); i++) {
     for (let j = 0; j < Math.ceil(h / pheromones_resolution); j++) {
-      // if (pheromones.home_pheromones[i][j] > 0) {
-      //   fill(
-      //     home_pher_col +
-      //       (
-      //         pheromones.home_pheromones[i][j] / pheromones.pheromones_ttl
-      //       ).toFixed(2) +
-      //       ")"
-      //   );
-      //   ellipse(
-      //     i * pheromones_resolution + pheromones_resolution / 2,
-      //     j * pheromones_resolution + pheromones_resolution / 2,
-      //     pheromones_resolution / 2,
-      //     pheromones_resolution / 2
-      //   );
-      // }
-      if (pheromones.food_pheromones[i][j] > 0) {
-        fill(
-          food_pher_col +
-            (
-              pheromones.food_pheromones[i][j] / pheromones.pheromones_ttl
-            ).toFixed(2) +
-            ")"
-        );
+      if (pheromones.home_pheromones[i][j] > 0) {
+        let col =
+          home_pher_col +
+          (
+            pheromones.home_pheromones[i][j] / pheromones.pheromones_ttl
+          ).toFixed(2) +
+          ")";
+        fill(col);
+        stroke(col);
         ellipse(
           i * pheromones_resolution + pheromones_resolution / 2,
           j * pheromones_resolution + pheromones_resolution / 2,
           pheromones_resolution / 2,
           pheromones_resolution / 2
+        );
+      }
+      if (pheromones.food_pheromones[i][j] > 0) {
+        let col =
+          food_pher_col +
+          (
+            pheromones.food_pheromones[i][j] / pheromones.pheromones_ttl
+          ).toFixed(2) +
+          ")";
+        fill(col);
+        stroke(col);
+        ellipse(
+          i * pheromones_resolution + pheromones_resolution / 2,
+          j * pheromones_resolution + pheromones_resolution / 2,
+          (pheromones_resolution * pheromones.food_pheromones[i][j]) /
+            pheromones.pheromones_ttl,
+          (pheromones_resolution * pheromones.food_pheromones[i][j]) /
+            pheromones.pheromones_ttl
         );
       }
     }

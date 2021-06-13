@@ -126,30 +126,7 @@ class Ant {
     );
 
     if (this.has_food) {
-      // let home_dir = createVector(0, 0);
-      // for (let i = start_x; i <= end_x; i++) {
-      //   for (let j = start_y; j < end_y; j++) {
-      //     let dist_dir = p5.Vector.sub(
-      //       createVector(
-      //         i * pheromones.pheromones_resolution + pheromones_resolution / 2,
-      //         j * pheromones.pheromones_resolution + pheromones_resolution / 2
-      //       ),
-      //       this.pos
-      //     );
-      //     if (
-      //       dist_dir.heading() > ((dir_angle - Math.PI / 4) % 2) * Math.PI &&
-      //       dist_dir.heading() < ((dir_angle + Math.PI / 4) % 2) * Math.PI
-      //     ) {
-      //       home_dir.add(
-      //         dist_dir.mult(pheromones.pheromones_ttl - pheromones.home_pheromones[i][j])
-      //       );
-      //     }
-      //   }
-      // }
-      // directions.add(p5.Vector.mult(home_dir.normalize(), home_coeff));
-      directions.add(this.home_dir(home).mult(home_coeff));
-    } else {
-      let food_dir = createVector(0, 0);
+      let home_dir = createVector(0, 0);
       for (let i = start_x; i <= end_x; i++) {
         for (let j = start_y; j < end_y; j++) {
           let dist_dir = p5.Vector.sub(
@@ -161,17 +138,47 @@ class Ant {
           );
           if (
             dist_dir.heading() > ((dir_angle - Math.PI / 4) % 2) * Math.PI &&
-            dist_dir.heading() < ((dir_angle + Math.PI / 4) % 2) * Math.PI &&
+            dist_dir.heading() < ((dir_angle + Math.PI / 4) % 2) * Math.PI
+          ) {
+            // home_dir.add(
+            //   dist_dir
+            //     .normalize()
+            //     .mult(
+            //       pheromones.pheromones_ttl - pheromones.home_pheromones[i][j]
+            //     )
+            // );
+            home_dir.add(dist_dir.normalize());
+          }
+        }
+      }
+      // directions.add(p5.Vector.mult(home_dir.normalize(), home_coeff));
+      directions.add(this.home_dir(home).mult(home_coeff));
+    } else {
+      let food_dir = createVector(0, 0);
+      for (let i = start_x; i <= end_x; i++) {
+        for (let j = start_y; j < end_y; j++) {
+          let dist_dir = p5.Vector.sub(
+            createVector(
+              i * pheromones.pheromones_resolution +
+                pheromones.pheromones_resolution / 2,
+              j * pheromones.pheromones_resolution +
+                pheromones.pheromones_resolution / 2
+            ),
+            this.pos
+          );
+          if (
+            dist_dir.heading() > ((dir_angle - Math.PI / 3) % 2) * Math.PI &&
+            dist_dir.heading() < ((dir_angle + Math.PI / 3) % 2) * Math.PI &&
             pheromones.food_pheromones[i][j] > 2
           ) {
-            food_dir.add(
-              dist_dir
-                .normalize()
-                .mult(
-                  pheromones.pheromones_ttl - pheromones.food_pheromones[i][j]
-                )
-            );
-            // food_dir.normalize().add(dist_dir);
+            // food_dir.add(
+            //   dist_dir
+            //     .normalize()
+            //     .mult(
+            //       pheromones.pheromones_ttl - pheromones.food_pheromones[i][j]
+            //     )
+            // );
+            food_dir.add(dist_dir.normalize());
           }
         }
       }
