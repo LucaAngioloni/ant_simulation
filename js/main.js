@@ -1,5 +1,5 @@
 const w = window.innerWidth;
-const h = window.innerHeight - 50;
+const h = window.innerHeight;
 
 const fr = 30;
 
@@ -22,13 +22,13 @@ const ant_stroke = "#572D15";
 const ant_food_color = "#B64D3A";
 const ant_speed = 4;
 
-const do_pheromones = true;
+const do_pheromones = false;
 const do_pheromone_draw = false;
 
-let momentum = 0.6; // memory
+let momentum = 0.65; // memory
 let randomness = 0.15;
-let home_coeff = 0.25;
-let food_coeff = 0.25;
+let home_coeff = 0.2;
+let food_coeff = 0.2;
 
 if (do_pheromones) {
   momentum = 0.15;
@@ -143,6 +143,7 @@ function draw() {
   stroke(0);
   ellipse(home.x, home.y, home_radius, home_radius);
 
+  textAlign(LEFT);
   // Print FPS
   let fps = frameRate();
   fill(255);
@@ -153,6 +154,12 @@ function draw() {
   fill(255);
   stroke(0);
   text("FOOD: " + tot_food, 10, 40);
+
+  // Print Totle
+  fill(ant_color);
+  stroke(home_color);
+  textAlign(CENTER);
+  text("Ant Simulation", w / 2, 40);
 }
 
 function evaporate() {
