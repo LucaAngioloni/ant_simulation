@@ -1,10 +1,14 @@
+// Get window size
 const w = window.innerWidth;
 const h = window.innerHeight;
 
+// Set maximum frame rate
 const fr = 30;
 
+// Init total food eaten to 0
 let tot_food = 0;
 
+// Init Parameters and Variables ------------------------------------
 const background_color = "#D4B59D";
 
 const food_rate = 60;
@@ -37,7 +41,14 @@ if (do_pheromones) {
   food_coeff = 0.55;
 }
 
+/**
+ * @type {FoodSource|FoodSourceConcentrated}
+ */
 let food_source;
+
+/**
+ * @type {Ant[]}
+ */
 let ants = [];
 
 const pheromones_range = 9;
@@ -69,15 +80,24 @@ const home_radius = 25;
 const home_color = "#B64D3A";
 let home;
 
+// ------------------------------------------------------------------
+
+/**
+ * P5.js setup function. Called just once at the beginning.
+ */
 function setup() {
   createCanvas(w, h);
   frameRate(fr);
   textSize(30);
 
+  // Place the home in a random spot
   home = createVector(random(0, w), random(0, h));
+
+  // Generate ants
   for (let index = 0; index < ant_number; index++) {
     ants.push(new Ant(home, w, h, ant_speed, ant_radius));
   }
+
   // food_source = new FoodSource(w, h, food_quantity, food_rate, food_refill);
   food_source = new FoodSourceConcentrated(
     w,
@@ -89,6 +109,9 @@ function setup() {
   );
 }
 
+/**
+ * P5.js draw function. This is called in a loop for every frame rendered.
+ */
 function draw() {
   // Refill food
   food_source.time_step();
@@ -130,12 +153,14 @@ function draw() {
     } else {
       fill(ant_color);
     }
-    tot_food += ant.is_home(home, home_radius);
+    if (ant.is_home(home, home_radius)) {
+      tot_food += 1;
+    }
     if (do_pheromones) {
       ant.emit_pheromones(pheromones);
       evaporate();
     }
-    ant.draw(ant_radius);
+    ant.draw();
   }
 
   // Home
@@ -162,6 +187,9 @@ function draw() {
   text("Ant Simulation", w / 2, 40);
 }
 
+/**
+ * This funnnction takes the pheromones values at time t and computes the natual decay of their values.
+ */
 function evaporate() {
   for (let i = 0; i < Math.ceil(w / pheromones_resolution); i++) {
     for (let j = 0; j < Math.ceil(h / pheromones_resolution); j++) {
@@ -178,6 +206,9 @@ function evaporate() {
 const food_pher_col = "rgba(255,113,113,";
 const home_pher_col = "rgba(159,216,223,";
 
+/**
+ * Utility function to draw the pheromones matrices.
+ */
 function draw_pheromones() {
   for (let i = 0; i < Math.ceil(w / pheromones_resolution); i++) {
     for (let j = 0; j < Math.ceil(h / pheromones_resolution); j++) {

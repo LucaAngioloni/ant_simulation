@@ -1,4 +1,20 @@
+/**
+ * @typedef {{x: Number, y: Number}} Vector
+ */
+
+/**
+ * Class that represents the autonomous agent Ant.
+ */
 class Ant {
+  /**
+   * Class contructor
+   * @constructor
+   * @param {Vector} home The vector of the home position
+   * @param {Number} w The canvas width
+   * @param {Number} h The canvas height
+   * @param {Number} speed The speed this Ant can move with
+   * @param {Number} radius The radius of the dots that make the Ant drawing
+   */
   constructor(home, w, h, speed, radius) {
     // this.pos = createVector(random(0, w), random(0, h));
     this.pos = home;
@@ -10,26 +26,47 @@ class Ant {
     this.has_food = false;
   }
 
-  draw(radius) {
-    const dir_vec = p5.Vector.mult(this.dir, radius);
-    ellipse(this.pos.x, this.pos.y, radius, radius);
+  /**
+   * This method draws the Ant on the screen
+   */
+  draw() {
+    const dir_vec = p5.Vector.mult(this.dir, this.radius);
+    ellipse(this.pos.x, this.pos.y, this.radius, this.radius);
     ellipse(
       this.pos.x + dir_vec.x,
       this.pos.y + dir_vec.y,
-      radius + 2,
-      radius + 2
+      this.radius + 2,
+      this.radius + 2
     );
-    ellipse(this.pos.x - dir_vec.x, this.pos.y - dir_vec.y, radius, radius);
+    ellipse(
+      this.pos.x - dir_vec.x,
+      this.pos.y - dir_vec.y,
+      this.radius,
+      this.radius
+    );
   }
 
+  /**
+   * This method checks is the Ant is inside the home circle.
+   * @param {Vector} home The vector of the home position.
+   * @param {Number} home_radius The radius of the home in pixels.
+   * @returns {Boolean} true if the Ant is home, false otherwise.
+   */
   is_home(home, home_radius) {
     if (this.pos.dist(home) < home_radius && this.has_food) {
       this.has_food = false;
-      return 1;
+      return true;
     }
-    return 0;
+    return false;
   }
 
+  /**
+   * This method checks if there is food in range of the Ant.
+   * If the ant has already food, it returns true, else if there is food in range it takes it and returns true, else it returns false.
+   * @param {Array<Vector>} food The list of food pieces as an Array of p5 Vectors.
+   * @param {Number} food_radius The radius of the food in pixels.
+   * @returns {Boolean} true if the Ant has or has found food, false otherwise.
+   */
   get_food(food, food_radius) {
     if (this.has_food) {
       return true;
@@ -45,10 +82,20 @@ class Ant {
     return false;
   }
 
+  /**
+   * Get a vector that represents the direction towards home from this Ant.
+   * @param {Vector} home The vector of the home position.
+   * @returns {Vector} the direction towards home.
+   */
   home_dir(home) {
     return p5.Vector.sub(home, this.pos).normalize();
   }
 
+  /**
+   * Get a general direction for food from this Ant.
+   * @param {Array<Vector>} food The list of food pieces as an Array of p5 Vectors.
+   * @returns {Vector} Vector with the general direction of food from this Ant.
+   */
   food_dir(food) {
     let food_dir = createVector(0, 0);
     for (let i = 0; i < food.length; i++) {
@@ -65,6 +112,15 @@ class Ant {
     return food_dir;
   }
 
+  /**
+   * Method called every frame draw from the main loop.
+   * It handles the movement of this Ant and computes a new position.
+   * @param {Number} momentum Coefficient that handles how much momentum the Ant should have.
+   * @param {Number} randomness Coefficient that handles how much random exploration the Ant should do.
+   * @param {Number} food_coeff Coefficient that handles how much the Ant should follow the food trace.
+   * @param {Number} home_coeff Coefficient that handles how much the home direction contributes to the movement if the Ant has food.
+   * @param {Array<Vector>} food The list of food pieces as an Array of p5 Vectors.
+   */
   move(momentum, randomness, food_coeff, home_coeff, food) {
     let directions = p5.Vector.mult(this.dir, momentum);
     const dir_angle = this.dir.heading();
@@ -87,6 +143,16 @@ class Ant {
     this.pos = a;
   }
 
+  /**
+   * Method equivalent to `move`, called every frame draw from the main loop.
+   * It handles the movement of this Ant and computes a new position using the pheromones.
+   * @param {Number} momentum Coefficient that handles how much momentum the Ant should have.
+   * @param {Number} randomness Coefficient that handles how much random exploration the Ant should do.
+   * @param {Number} food_coeff Coefficient that handles how much the Ant should follow the food trace.
+   * @param {Number} home_coeff Coefficient that handles how much the home direction contributes to the movement if the Ant has food.
+   * @param {Array<Vector>} food The list of food pieces as an Array of p5 Vectors.
+   * @param {Object} pheromones An object containing the Pheromones and their parameters.
+   */
   move_pheromones(
     momentum,
     randomness,
@@ -195,6 +261,10 @@ class Ant {
     this.pos = a;
   }
 
+  /**
+   * This method adds the pheromones generated from this ant to the pheromones data.
+   * @param {Object} pheromones An object containing the Pheromones and their parameters.
+   */
   emit_pheromones(pheromones) {
     const i = constrain(
       Math.floor(this.pos.x / pheromones.pheromones_resolution),
