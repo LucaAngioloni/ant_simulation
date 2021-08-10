@@ -2,11 +2,13 @@
 const w = window.innerWidth;
 const h = window.innerHeight;
 
+const shift_key = 16;
+const d_key = 68;
+
 // Set maximum frame rate
 const fr = 30;
 
-const shift_key = 16;
-const d_key = 68;
+// Throttle the keyboard commands
 const throttle_frames = 5;
 let throttole = 0;
 

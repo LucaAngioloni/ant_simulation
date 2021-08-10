@@ -26,6 +26,14 @@ To change the hyperparameters go to `js/main.js` and change them.
 // Set maximum frame rate
 const fr = 30;
 
+// Throttle the keyboard commands
+const throttle_frames = 5;
+let throttole = 0;
+
+// Init total food eaten to 0
+let tot_food = 0;
+
+// Init Parameters and Variables ------------------------------------
 const background_color = "#D4B59D";
 
 const food_rate = 60;
@@ -43,20 +51,35 @@ const ant_stroke = "#572D15";
 const ant_food_color = "#B64D3A";
 const ant_speed = 4;
 
-const do_pheromones = false;
-const do_pheromone_draw = false;
+let do_pheromones = false;
+let do_pheromone_draw = false;
 
-let momentum = 0.65; // memory
-let randomness = 0.15;
-let home_coeff = 0.2;
-let food_coeff = 0.2;
+let momentum; // memory
+let randomness;
+let home_coeff;
+let food_coeff;
 
-if (do_pheromones) {
-  momentum = 0.15;
-  randomness = 0.05;
-  home_coeff = 0.55;
-  food_coeff = 0.55;
+function set_normal_coeff() {
+  momentum = 0.65;
+  randomness = 0.15;
+  home_coeff = 0.2;
+  food_coeff = 0.2;
 }
+
+function set_pheromones_coeff() {
+  momentum = 0.2;
+  randomness = 0.2;
+  home_coeff = 0.7;
+  food_coeff = 0.4;
+}
+
+const pheromones_range = 50;
+const pheromones_resolution = 10;
+const pheromones_food_ttl = 50000;
+const pheromones_home_ttl = 50000 * 5;
+const home_decay = 0.99;
+const food_decay = 0.99;
+const field_of_view = Math.PI / 4;
 
 const home_radius = 25;
 const home_color = "#B64D3A";
@@ -71,4 +94,9 @@ const do_pheromones = true;
 const do_pheromone_draw = true;
 ```
 
-This mode is still not quite ready. Needs some fixes.
+Or use the provided keyboard commands:
+
+- **shift** key to toggle the pheromones mode.
+- **D** key to toggle the pheromone drawing feature.
+
+This feature needs to be tuned to work well.
