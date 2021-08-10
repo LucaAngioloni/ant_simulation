@@ -24,6 +24,8 @@ class Ant {
     this.speed = speed;
     this.radius = radius;
     this.has_food = false;
+    this.home_closeness = 1.0;
+    this.food_closeness = 1.0;
   }
 
   /**
@@ -53,9 +55,12 @@ class Ant {
    * @returns {Boolean} true if the Ant is home, false otherwise.
    */
   is_home(home, home_radius) {
-    if (this.pos.dist(home) < home_radius && this.has_food) {
-      this.has_food = false;
-      return true;
+    if (this.pos.dist(home) < home_radius) {
+      this.home_closeness = 1.0;
+      if (this.has_food) {
+        this.has_food = false;
+        return true;
+      }
     }
     return false;
   }
@@ -76,6 +81,7 @@ class Ant {
       if (this.pos.dist(f) <= food_radius) {
         this.has_food = true;
         food.splice(i, 1);
+        this.food_closeness = 1.0;
         return true;
       }
     }
@@ -203,22 +209,30 @@ class Ant {
             this.pos
           );
           if (
-            dist_dir.heading() > ((dir_angle - Math.PI / 4) % 2) * Math.PI &&
-            dist_dir.heading() < ((dir_angle + Math.PI / 4) % 2) * Math.PI
+            dist_dir.heading() >
+              (dir_angle - pheromones.field_of_view) % (2 * Math.PI) &&
+            dist_dir.heading() <
+              (dir_angle + pheromones.field_of_view) % (2 * Math.PI) &&
+            pheromones.home_pheromones[i][j] > 1
           ) {
-            // home_dir.add(
-            //   dist_dir
-            //     .normalize()
-            //     .mult(
-            //       pheromones.pheromones_ttl - pheromones.home_pheromones[i][j]
-            //     )
-            // );
-            home_dir.add(dist_dir.normalize());
+            home_dir.add(
+              dist_dir
+                .normalize()
+                .mult(
+                  pheromones.home_pheromones[i][j] /
+                    pheromones.pheromones_home_ttl
+                )
+            );
           }
         }
       }
-      // directions.add(p5.Vector.mult(home_dir.normalize(), home_coeff));
-      directions.add(this.home_dir(home).mult(home_coeff));
+      directions.add(home_dir.normalize().mult(home_coeff));
+      //home and home_radius are globals... bad stuff...
+      let real_h_dir = p5.Vector.sub(home, this.pos);
+      if (real_h_dir.mag() < home_radius * 3) {
+        directions.add(real_h_dir.normalize().mult(home_coeff));
+      }
+      // directions.add(this.home_dir(home).mult(home_coeff));
     } else {
       let food_dir = createVector(0, 0);
       for (let i = start_x; i <= end_x; i++) {
@@ -233,23 +247,25 @@ class Ant {
             this.pos
           );
           if (
-            dist_dir.heading() > ((dir_angle - Math.PI / 3) % 2) * Math.PI &&
-            dist_dir.heading() < ((dir_angle + Math.PI / 3) % 2) * Math.PI &&
-            pheromones.food_pheromones[i][j] > 2
+            dist_dir.heading() >
+              (dir_angle - pheromones.field_of_view) % (2 * Math.PI) &&
+            dist_dir.heading() <
+              (dir_angle + pheromones.field_of_view) % (2 * Math.PI) &&
+            pheromones.food_pheromones[i][j] > 1
           ) {
-            // food_dir.add(
-            //   dist_dir
-            //     .normalize()
-            //     .mult(
-            //       pheromones.pheromones_ttl - pheromones.food_pheromones[i][j]
-            //     )
-            // );
-            food_dir.add(dist_dir.normalize());
+            food_dir.add(
+              dist_dir
+                .normalize()
+                .mult(
+                  pheromones.food_pheromones[i][j] /
+                    pheromones.pheromones_food_ttl
+                )
+            );
           }
         }
       }
       directions.add(p5.Vector.mult(food_dir, food_coeff));
-      directions.add(p5.Vector.mult(this.food_dir(food), 0.2));
+      directions.add(this.food_dir(food)); //FIX this
     }
 
     const mov = directions.normalize().mult(this.speed);
@@ -277,9 +293,14 @@ class Ant {
       Math.ceil(this.h / pheromones.pheromones_resolution) - 1
     );
     if (this.has_food) {
-      pheromones.food_pheromones[i][j] = pheromones.pheromones_ttl;
+      pheromones.food_pheromones[i][j] =
+        pheromones.pheromones_food_ttl * this.food_closeness;
     } else {
-      pheromones.home_pheromones[i][j] = pheromones.pheromones_ttl;
+      pheromones.home_pheromones[i][j] =
+        pheromones.pheromones_home_ttl * this.home_closeness;
     }
+
+    this.home_closeness = this.home_closeness * pheromones.home_decay;
+    this.food_closeness = this.food_closeness * pheromones.food_decay;
   }
 }
